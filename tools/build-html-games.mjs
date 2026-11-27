@@ -5,7 +5,7 @@ import { execFileSync } from "node:child_process";
 
 const owner="lostgemsy", repo="Holost", ref="main";
 const cdnRoot=`https://cdn.jsdelivr.net/gh/${owner}/${repo}@${ref}/`;
-const outDir="GamesHtml";
+const outDirs=["GamesHtml","html"];
 
 function api(url){
   return JSON.parse(execFileSync("curl",["-fsSL",url],{encoding:"utf8"}));
@@ -28,8 +28,7 @@ function rewriteHtml(html, gamePath){
   return html;
 }
 
-fs.rmSync(outDir,{recursive:true,force:true});
-fs.mkdirSync(outDir,{recursive:true});
+for (const outDir of outDirs) { fs.rmSync(outDir,{recursive:true,force:true}); fs.mkdirSync(outDir,{recursive:true}); }
 
 const tree=api(`https://api.github.com/repos/${owner}/${repo}/git/trees/${ref}?recursive=1`).tree;
 const roots=[...new Set(tree.map(x=>x.path.split("/")[0]).filter(Boolean))]
@@ -46,12 +45,12 @@ for(const game of roots){
   ],{encoding:"utf8"});
 
   const safe=game.replace(/[^a-zA-Z0-9._-]+/g,"_");
-  fs.writeFileSync(path.join(outDir,safe+".html"),rewriteHtml(raw,game));
+  for (const outDir of outDirs) fs.writeFileSync(path.join(outDir,safe+".html"),rewriteHtml(raw,game));
   count++;
 }
 
-fs.writeFileSync(path.join(outDir,"manifest.json"),JSON.stringify({
+for (const outDir of outDirs) fs.writeFileSync(path.join(outDir,"manifest.json"),JSON.stringify({
   generatedAt:new Date().toISOString(), ref, cdnRoot, games:count, missingIndex:missing
 },null,2));
 
-console.log(`Generated ${count} game HTML files; ${missing} root folders had no index.html.`);
+console.log(`Generated ${count} game HTML files into GamesHtml/ and html/; ${missing} root folders had no index.html.`);
