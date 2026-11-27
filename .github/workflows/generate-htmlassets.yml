@@ -1,0 +1,101 @@
+name: Generate htmlassets CDN copies
+
+on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - "htmlassets/**"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Generate flat htmlassets and jsDelivr links
+        shell: bash
+        run: |
+          python - <<'PY'
+          import os, re, shutil, posixpath
+          from urllib.parse import quote
+
+          CDN = 'https://cdn.jsdelivr.net/gh/lostgemsy/Holost@main/'
+          shutil.rmtree('htmlassets', ignore_errors=True)
+          os.makedirs('htmlassets', exist_ok=True)
+
+          skip = {'.git', 'node_modules', 'htmlassets', 'GamesHtml', 'covers'}
+          games = []
+
+          for dirpath, dirs, files in os.walk('.'):
+              dirs[:] = [d for d in dirs if d not in skip]
+              if dirpath.count(os.sep) == 1 and 'index.html' in files:
+                  games.append((os.path.basename(dirpath), os.path.join(dirpath, 'index.html')))
+
+          games.sort()
+
+          attr = re.compile(r'(?P<prefix>\b(?:src|href|poster|action)\s*=\s*["\'])(?P<url>[^"\']+)', re.I)
+          skip_url = re.compile(r'^(?:[a-z][a-z0-9+.-]*:|//|#|data:|javascript:)', re.I)
+
+          for game, path in games:
+              with open(path, encoding='utf-8', errors='ignore') as f:
+                  old = f.read()
+
+              def rewrite(m):
+                  url = m.group('url').strip()
+                  if skip_url.match(url) or url.startswith('/'):
+                      return m.group(0)
+
+                  base, sep, suffix = url.partition('?')
+                  if '#' in base:
+                      base, frag = base.split('#', 1)
+                      suffix = '#' + frag + (('?' + suffix) if sep else '')
+                  elif sep:
+                      suffix = '?' + suffix
+
+                  if not base or base.startswith('mailto:'):
+                      return m.group(0)
+
+                  repo_path = posixpath.normpath(posixpath.join(game, base.replace('\\', '/')))
+                  if repo_path.startswith('../') or repo_path == '..':
+                      return m.group(0)
+
+                  encoded = '/'.join(quote(part, safe='') for part in repo_path.split('/') if part not in ('', '.'))
+                  return m.group('prefix') + CDN + encoded + suffix
+
+              new = attr.sub(rewrite, old)
+
+              if new != old:
+                  with open(path, 'w', encoding='utf-8', newline='') as f:
+                      f.write(new)
+
+              # Keep the original game/index.html and create one flat copy.
+              with open(f'htmlassets/{game}.html', 'w', encoding='utf-8', newline='') as f:
+                  f.write(new)
+
+          print(f'Generated {len(games)} flat htmlassets files.')
+
+          # Remove any old nested htmlassets directories if the checkout contained them.
+          for name in os.listdir('htmlassets'):
+              p = os.path.join('htmlassets', name)
+              if os.path.isdir(p):
+                  shutil.rmtree(p)
+
+          PY
+
+      - name: Commit generated files
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if git diff --cached --quiet; then
+            echo "No changes."
+            exit 0
+          fi
+          git commit -m "Generate flat htmlassets with jsDelivr links"
+          git push
