@@ -2,8 +2,8 @@
   {
     "id": 0,
     "name": "1",
-    "cover": "{covers}/1.png",
-    "url": "{htmlassets}/31.html",
+    "cover": "{COVER_URL}/1.png",
+    "url": "{HTML_URL}/1.html",
     "author": "lostgemsy",
     "authorLink": "https://github.com/lostgemsy"
   },
