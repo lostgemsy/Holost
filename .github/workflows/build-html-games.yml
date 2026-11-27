@@ -34,6 +34,58 @@ jobs:
 
       - name: Build GamesHtml
         run: node tools/build-html-games.mjs
+      - name: Convert game index links to jsDelivr and flatten htmlassets
+        shell: bash
+        run: |
+          python - <<'PY'
+          import os, re, shutil
+          from urllib.parse import quote
+          ROOT='.'
+          CDN='https://cdn.jsdelivr.net/gh/lostgemsy/Holost@main/'
+          shutil.rmtree('htmlassets', ignore_errors=True)
+          os.makedirs('htmlassets', exist_ok=True)
+          skip_dirs={'.git','node_modules','htmlassets','GamesHtml','covers'}
+          # Only root-level game index.html files; ignore nested asset indexes.
+          games=[]
+          for dirpath, dirs, files in os.walk(ROOT):
+              dirs[:] = [d for d in dirs if d not in skip_dirs]
+              if dirpath.count(os.sep) != 1 or 'index.html' not in files:
+                  continue
+              game=os.path.basename(dirpath)
+              games.append((game, os.path.join(dirpath,'index.html')))
+          games.sort()
+          attr=re.compile(r'(?P<prefix>\\b(?:src|href|poster|action)\\s*=\\s*[\\\"\\\'])(?P<url>[^\\\"\\\']+)', re.I)
+          scheme=re.compile(r'^(?:[a-z][a-z0-9+.-]*:|//|#|data:|javascript:)', re.I)
+          for game, path in games:
+              text=open(path,encoding='utf-8',errors='ignore').read()
+              def repl(m):
+                  u=m.group('url').strip()
+                  if scheme.match(u) or u.startswith('/'):
+                      return m.group(0)
+                  clean=u.split('#',1)[0].split('?',1)[0]
+                  if not clean:
+                      return m.group(0)
+                  parts=[]
+                  for p in clean.replace('\\\\','/').split('/'):
+                      if p in ('','.'): continue
+                      if p=='..':
+                          if parts: parts.pop()
+                      else: parts.append(p)
+                  if not parts: return m.group(0)
+                  cdn=CDN + quote(game,safe='') + '/' + '/'.join(quote(p,safe='') for p in parts)
+                  suffix=u[len(clean):]
+                  return m.group('prefix') + cdn + suffix
+              new=attr.sub(repl,text)
+              if new != text:
+                  open(path,'w',encoding='utf-8').write(new)
+              # Keep the original game index.html in place and create only a flat copy.
+              flat='htmlassets/'+quote(game,safe='')+'.html'
+              flat=flat.replace('%','') if '%' in flat else flat
+              # Git filenames should use the actual game name, not URL encoding.
+              flat='htmlassets/'+game+'.html'
+              shutil.copy2(path,flat)
+          print(f'Processed {len(games)} game index files.')
+          PY
 
       - name: Build covers
         shell: bash
