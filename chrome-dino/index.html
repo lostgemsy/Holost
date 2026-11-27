@@ -12,17 +12,17 @@
       content="width=device-width, initial-scale=1.0,
             maximum-scale=1.0, user-scalable=no"
     />
-    <link rel="apple-touch-icon" sizes="128x128" href="icons/icon-128.png" />
-    <link rel="apple-touch-icon" sizes="256x256" href="icons/icon-256.png" />
-    <link rel="icon" href="./icons/icon-256.png">
+    <link rel="apple-touch-icon" sizes="128x128" href="https://cdn.jsdelivr.net/gh/lostgemsy/Holost@main/chrome-dino/icons/icon-128.png" />
+    <link rel="apple-touch-icon" sizes="256x256" href="https://cdn.jsdelivr.net/gh/lostgemsy/Holost@main/chrome-dino/icons/icon-256.png" />
+    <link rel="icon" href="https://cdn.jsdelivr.net/gh/lostgemsy/Holost@main/chrome-dino/icons/icon-256.png">
     <title>Chrome Dino</title>
-    <link rel="stylesheet" href="styles/interstitial_core.css" />
-    <link rel="stylesheet" href="styles/interstitial_common.css" />
-    <link rel="stylesheet" href="styles/neterror.css" />
-    <script src="scripts/neterror.slim.js"></script>
-    <script src="scripts/offline.js"></script>
-    <script src="scripts/offline-sprite-definitions.js"></script>
-    <link rel="manifest" href="appmanifest.json" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/lostgemsy/Holost@main/chrome-dino/styles/interstitial_core.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/lostgemsy/Holost@main/chrome-dino/styles/interstitial_common.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/lostgemsy/Holost@main/chrome-dino/styles/neterror.css" />
+    <script src="https://cdn.jsdelivr.net/gh/lostgemsy/Holost@main/chrome-dino/scripts/neterror.slim.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/lostgemsy/Holost@main/chrome-dino/scripts/offline.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/lostgemsy/Holost@main/chrome-dino/scripts/offline-sprite-definitions.js"></script>
+    <link rel="manifest" href="https://cdn.jsdelivr.net/gh/lostgemsy/Holost@main/chrome-dino/appmanifest.json" />
   </head>
   <body id="t" class="neterror" style="font-size: 75%;">
     <div id="main-frame-error" class="interstitial-wrapper">
@@ -59,8 +59,8 @@
       <div id="sub-frame-error-details" jsselect="summary" jsvalues=".innerHTML:msg" style="display: none;"></div>
     </div>
     <div id="offline-resources">
-      <img id="offline-resources-1x" src="images/default_100_percent/offline/100-offline-sprite.png" />
-      <img id="offline-resources-2x" src="images/default_200_percent/offline/200-offline-sprite.png" />
+      <img id="offline-resources-1x" src="https://cdn.jsdelivr.net/gh/lostgemsy/Holost@main/chrome-dino/images/default_100_percent/offline/100-offline-sprite.png" />
+      <img id="offline-resources-2x" src="https://cdn.jsdelivr.net/gh/lostgemsy/Holost@main/chrome-dino/images/default_200_percent/offline/200-offline-sprite.png" />
       <template id="audio-resources">
         <audio
           id="offline-sound-press"
@@ -76,8 +76,8 @@
         ></audio>
       </template>
     </div>
-    <script src="scripts/load_time_data.js"></script>
-    <script src="scripts/strings.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/lostgemsy/Holost@main/chrome-dino/scripts/load_time_data.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/lostgemsy/Holost@main/chrome-dino/scripts/strings.js"></script>
     <script>
       function is_touch_enabled() {
         return "ontouchstart" in window || navigator.maxTouchPoints > 0 || navigator.msMaxTouchPoints > 0;
@@ -90,26 +90,26 @@
       function changeTheme() {
         switch (document.getElementById("themeDino").value) {
           case "default":
-            location.href = "index.html";
+            location.href = "https://cdn.jsdelivr.net/gh/lostgemsy/Holost@main/chrome-dino/index.html";
             break;
           case "hurdling":
-            location.href = "1_hurdling.html";
+            location.href = "https://cdn.jsdelivr.net/gh/lostgemsy/Holost@main/chrome-dino/1_hurdling.html";
             break;
           case "gymnastics":
-            location.href = "2_gymnastics.html";
+            location.href = "https://cdn.jsdelivr.net/gh/lostgemsy/Holost@main/chrome-dino/2_gymnastics.html";
             break;
           case "surfing":
-            location.href = "3_surfing.html";
+            location.href = "https://cdn.jsdelivr.net/gh/lostgemsy/Holost@main/chrome-dino/3_surfing.html";
             break;
           case "swimming":
-            location.href = "4_swimming.html";
+            location.href = "https://cdn.jsdelivr.net/gh/lostgemsy/Holost@main/chrome-dino/4_swimming.html";
             break;
           case "equestrian":
-            location.href = "5_equestrian.html";
+            location.href = "https://cdn.jsdelivr.net/gh/lostgemsy/Holost@main/chrome-dino/5_equestrian.html";
             break;
         }
       }
     </script>
-    <script src="register-sw.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/lostgemsy/Holost@main/chrome-dino/register-sw.js"></script>
   </body>
 </html>
