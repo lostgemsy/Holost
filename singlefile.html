@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Holost Zones</title>
+<style>
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;background:#050505;color:#fff;font-family:Inter,system-ui,sans-serif}
+body{overflow:hidden}.app{height:100%;display:grid;grid-template-rows:68px 1fr}
+header{display:flex;align-items:center;gap:16px;padding:14px 18px;border-bottom:1px solid #202020;background:#080808}
+.logo{font-weight:900;letter-spacing:.18em}.search{margin-left:auto;width:min(380px,45vw);padding:10px 13px;background:#111;border:1px solid #292929;border-radius:12px;color:#fff;outline:0}
+.layout{display:grid;grid-template-columns:300px 1fr;height:100%;min-height:0}.zones{overflow:auto;padding:14px;border-right:1px solid #202020}
+.card{display:flex;align-items:center;gap:12px;width:100%;padding:9px;background:transparent;border:1px solid transparent;border-radius:12px;color:#aaa;text-align:left;cursor:pointer;margin-bottom:6px}
+.card:hover,.card.active{background:#121212;border-color:#282828;color:#fff}.cover{width:48px;height:48px;object-fit:cover;border-radius:9px;background:#111}.name{font-weight:700}.id{font-size:10px;color:#666;margin-top:3px}
+.viewer{position:relative;min-width:0;background:#000}.viewer iframe{position:absolute;inset:0;width:100%;height:100%;border:0;background:#000}
+.overlay{position:absolute;z-index:3;top:12px;left:12px;right:12px;display:flex;align-items:center;gap:10px;pointer-events:none}
+.info{padding:9px 12px;border:1px solid #292929;border-radius:10px;background:#080808dd;backdrop-filter:blur(12px);pointer-events:auto}
+.info b{display:block}.author{font-size:11px;color:#777}.controls{margin-left:auto;display:flex;gap:7px}.btn{border:1px solid #292929;background:#101010;color:#fff;border-radius:9px;padding:8px 11px;cursor:pointer}.btn:hover{background:#191919}
+.empty{height:100%;display:grid;place-items:center;color:#666}.hidden{display:none!important}
+@media(max-width:700px){.layout{grid-template-columns:1fr}.zones{display:none}.search{width:55vw}}
+</style>
+</head>
+<body>
+<div class="app">
+<header><div class="logo">HOLOST / ZONES</div><input id="search" class="search" placeholder="Search games..." autocomplete="off"></header>
+<div class="layout">
+<aside id="zones" class="zones"></aside>
+<main class="viewer">
+<div class="overlay">
+<div class="info"><b id="zoneName">Select a game</b><span id="zoneAuthor" class="author">CDN zone</span></div>
+<div class="controls"><button class="btn" id="newTab">New tab</button><button class="btn" id="full">Fullscreen</button><button class="btn" id="close">Close</button></div>
+</div>
+<div id="empty" class="empty">Choose a zone</div>
+<iframe id="zoneFrame" allow="fullscreen; autoplay; gamepad; xr-spatial-tracking" referrerpolicy="no-referrer-when-downgrade"></iframe>
+</main>
+</div>
+</div>
+<script src="./zone.js"></script>
+<script>
+(function(){
+  const zones=window.HOLOST_ZONES||[];
+  const list=document.getElementById("zones"), frame=document.getElementById("zoneFrame");
+  const nameEl=document.getElementById("zoneName"), authorEl=document.getElementById("zoneAuthor");
+  const empty=document.getElementById("empty"), search=document.getElementById("search");
+
+  function esc(s){return String(s||"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]))}
+
+  function render(q){
+    list.innerHTML="";
+    zones.filter(z=>z.name.toLowerCase().includes(q.toLowerCase())).forEach(z=>{
+      const b=document.createElement("button");
+      b.className="card";
+      const img=resolveCoverUrl(z);
+      b.innerHTML='<img class="cover" src="'+esc(img)+'" loading="lazy"><span><span class="name">'+esc(z.name)+'</span><span class="id">'+esc(z.id)+'</span></span>';
+      b.onclick=()=>openZone(z);
+      list.appendChild(b);
+    });
+  }
+
+  function openZone(zone){
+    const url=resolveZoneUrl(zone)+"?t="+Date.now();
+    frame.src=url;
+    nameEl.textContent=zone.name;
+    authorEl.textContent="by "+(zone.author||"lostgemsy");
+    empty.classList.add("hidden");
+    document.title="Holost / "+zone.name;
+    const next=new URL(location.href);
+    next.searchParams.set("id",zone.id);
+    history.pushState(null,"",next);
+    [...list.children].forEach(b=>b.classList.toggle("active",b.querySelector(".name")?.textContent===zone.name));
+  }
+
+  function current(){
+    return getZone(new URLSearchParams(location.search).get("id"));
+  }
+
+  document.getElementById("newTab").onclick=()=>{
+    const z=current(); if(z) window.open(resolveZoneUrl(z)+"?t="+Date.now(),"_blank","noopener");
+  };
+  document.getElementById("full").onclick=()=>{
+    if(frame.requestFullscreen) frame.requestFullscreen();
+    else if(frame.webkitRequestFullscreen) frame.webkitRequestFullscreen();
+  };
+  document.getElementById("close").onclick=()=>{
+    frame.src="about:blank"; empty.classList.remove("hidden");
+    nameEl.textContent="Select a game"; authorEl.textContent="CDN zone";
+    const u=new URL(location.href); u.searchParams.delete("id"); history.pushState(null,"",u);
+  };
+  search.oninput=e=>render(e.target.value);
+  window.addEventListener("popstate",()=>{const z=current();if(z)openZone(z);else document.getElementById("close").click()});
+
+  render("");
+  const first=current();
+  if(first) openZone(first); 
+})();
+</script>
+</body>
+</html>
