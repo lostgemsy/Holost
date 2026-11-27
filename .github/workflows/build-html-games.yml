@@ -1,4 +1,5 @@
 name: Build CDN game HTML and covers
+# Regenerate all game wrappers and PNG covers from the current catalog.
 
 on:
   push:
