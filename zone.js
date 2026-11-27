@@ -14,7 +14,7 @@ window.HOLOST_ZONES = [
     id: game.path,
     name: game.name,
     author: "lostgemsy",
-    cover: game.image || "",
+    cover: game.path.replace(/[^a-zA-Z0-9._-]+/g, "_") + ".png",
     html: game.path.replace(/[^a-zA-Z0-9._-]+/g, "_") + ".html"
   })))
 ];
@@ -36,7 +36,7 @@ window.resolveZoneUrl = function(zone) {
 
 window.resolveCoverUrl = function(zone) {
   if (!zone.cover) return "";
-  return window.holostCdn(zone.cover);
+  return window.holostCdn(window.HOLOST_ZONE_CONFIG.coversDir + "/" + zone.cover);
 };
 
 window.getZone = function(id) {
