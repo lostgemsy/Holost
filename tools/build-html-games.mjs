@@ -5,7 +5,7 @@ import { execFileSync } from "node:child_process";
 
 const owner="lostgemsy", repo="Holost", ref="main";
 const cdnRoot=`https://cdn.jsdelivr.net/gh/${owner}/${repo}@${ref}/`;
-const outDir="htmlGames";
+const outDir="GamesHtml";
 
 function api(url){
   return JSON.parse(execFileSync("curl",["-fsSL",url],{encoding:"utf8"}));
