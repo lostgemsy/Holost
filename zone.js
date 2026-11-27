@@ -19,21 +19,24 @@ window.HOLOST_ZONES = [
   })))
 ];
 
-window.HOLOST_CDN = function(path) {
-  const cfg = window.HOLOST_ZONE_CONFIG;
-  return "https://cdn.jsdelivr.net/gh/" + cfg.owner + "/" + cfg.repo + "@" + cfg.ref + "/" +
-    path.split("/").map(encodeURIComponent).join("/");
+window.HOLOST_CDN = "https://cdn.jsdelivr.net/gh/" +
+  window.HOLOST_ZONE_CONFIG.owner + "/" +
+  window.HOLOST_ZONE_CONFIG.repo + "@" +
+  window.HOLOST_ZONE_CONFIG.ref + "/";
+
+window.holostCdn = function(path) {
+  return window.HOLOST_CDN + String(path).split("/").map(encodeURIComponent).join("/");
 };
 
 window.resolveZoneUrl = function(zone) {
-  return window.HOLOST_CDN(
+  return window.holostCdn(
     window.HOLOST_ZONE_CONFIG.htmlDir + "/" + zone.html
   );
 };
 
 window.resolveCoverUrl = function(zone) {
   if (!zone.cover) return "";
-  return window.HOLOST_CDN(zone.cover);
+  return window.holostCdn(zone.cover);
 };
 
 window.getZone = function(id) {
