@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Holost Zones</title>
+<style>
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;background:#050505;color:#fff;font:14px Inter,system-ui,sans-serif}button,input{font:inherit}
+body{overflow:hidden}.app{height:100%;display:grid;grid-template-rows:auto 1fr}.bar{height:68px;padding:14px 18px;display:flex;align-items:center;gap:16px;border-bottom:1px solid #202020;background:#080808}.brand{font-weight:800;letter-spacing:.16em}.search{margin-left:auto;width:min(360px,45vw);background:#111;border:1px solid #292929;border-radius:12px;padding:10px 13px;color:#aaa;outline:0}.search:focus{border-color:#555}.shell{display:grid;grid-template-columns:280px 1fr;height:100%;min-height:0}.list{overflow:auto;border-right:1px solid #202020;padding:14px}.game{display:block;width:100%;text-align:left;background:transparent;border:1px solid transparent;color:#aaa;border-radius:10px;padding:10px 12px;margin-bottom:5px;cursor:pointer}.game:hover,.game.active{color:#fff;background:#121212;border-color:#262626}.stage{position:relative;background:#000}.stage iframe{position:absolute;inset:0;width:100%;height:100%;border:0;background:#000}.empty{display:grid;place-items:center;height:100%;color:#777}.meta{position:absolute;z-index:2;top:12px;left:12px;padding:7px 10px;border:1px solid #252525;background:#080808dd;border-radius:9px;backdrop-filter:blur(12px);font-size:12px;color:#aaa}.meta b{color:#fff}.count{font-size:11px;color:#666;margin-top:3px}@media(max-width:700px){.shell{grid-template-columns:1fr}.list{display:none}.search{width:50vw}.bar{height:58px}}
+</style>
+</head>
+<body>
+<div class="app">
+<header class="bar"><div class="brand">HOLOST / ZONES</div><input id="search" class="search" placeholder="Search games..." autocomplete="off"></header>
+<div class="shell"><aside id="list" class="list"></aside><main class="stage"><div class="meta"><b id="title">Select a game</b><div class="count" id="status">CDN zone</div></div><iframe id="frame" allow="fullscreen; autoplay; gamepad; xr-spatial-tracking" referrerpolicy="no-referrer-when-downgrade"></iframe><div id="empty" class="empty">Choose a zone</div></main></div>
+</div>
+<script>
+const CDN="https://cdn.jsdelivr.net/gh/lostgemsy/Holost@main/";
+const games=window.HOLOST_GAMES||[];
+const list=document.querySelector("#list"),frame=document.querySelector("#frame"),title=document.querySelector("#title"),status=document.querySelector("#status"),empty=document.querySelector("#empty"),search=document.querySelector("#search");
+function esc(s){return String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c]||c))}
+function fileFor(g){return CDN+"htmlGames/"+encodeURIComponent(g.path).replace(/%2F/g,"_")+".html"}
+function render(q=""){list.innerHTML="";const a=games.filter(g=>g.name.toLowerCase().includes(q.toLowerCase()));for(const g of a){const b=document.createElement("button");b.className="game";b.textContent=g.name;b.onclick=()=>openZone(g);list.appendChild(b)}status.textContent=a.length+" zones"}
+function openZone(g){frame.src=fileFor(g);title.textContent=g.name;empty.style.display="none";document.title="Holost / "+g.name;history.replaceState({zone:g.path},"","?zone="+encodeURIComponent(g.path));[...list.children].forEach(b=>b.classList.toggle("active",b.textContent===g.name))}
+search.oninput=e=>render(e.target.value);
+window.addEventListener("popstate",()=>loadFromUrl());
+function loadFromUrl(){const id=new URLSearchParams(location.search).get("zone");if(id){const g=games.find(x=>x.path===id);if(g)openZone(g)}}
+render();loadFromUrl();
+</script>
+</body>
+</html>
